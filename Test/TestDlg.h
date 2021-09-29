@@ -3,15 +3,17 @@
 //
 
 #pragma once
+class CUnitSerial;
 class CTEST3;
 
 // CTestDlg 대화 상자
 class CTestDlg : public CDialogEx
+	
 {
 // 생성입니다.
 public:
 	CTestDlg(CWnd* pParent = NULL);	// 표준 생성자입니다.
-
+	virtual ~CTestDlg();
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_TEST_DIALOG };
@@ -38,6 +40,7 @@ public:
 		int nItemCode = 0;
 	};
 
+
 	afx_msg void OnBnClickedButton1();
 	afx_msg void OnBnClickedButton2();
 	afx_msg void OnBnClickedButton3();
@@ -46,27 +49,46 @@ public:
 	afx_msg void OnBnClickedButton6();
 	afx_msg void OnBnClickedButton7();
 
-	CTEST3* m_pTest1 = nullptr;
+	
 	afx_msg void OnBnClickedButton8();
 	afx_msg void OnBnClickedButton9();
 
 	const double pow1(double x, int y);
 
-	template< typename Func> void Test3(Func func);
 	afx_msg void OnBnClickedButton10();
 	afx_msg void OnBnClickedButton11();
 	afx_msg void OnBnClickedButton12();
 	afx_msg void OnBnClickedButton13();
 	afx_msg void OnBnClickedButton14();
-	afx_msg void OnHotKey(UINT nHotKeyId, UINT nKey1, UINT nKey2);
+	afx_msg void OnBnClickedButton15();
+	afx_msg void OnBnClickedButton16();
+	afx_msg void OnBnClickedButton17();
+	afx_msg void OnBnClickedButton18();
+	afx_msg void OnBnClickedButton19();
+	afx_msg void OnBnClickedButton20();
+	afx_msg void OnBnClickedButton21();
+	afx_msg void OnBnClickedButton22();
+	afx_msg void OnBnClickedButton24();
 
+
+
+	char* strTok(char** newString, char* delimiter);
+	bool FileReadOnMemory(LPCSTR lpszPathName, char** lpcFileRead);
+	bool WriteToFile(const char* filename, const char* buffer, int len);
+	bool ReadToFile(const char* filename, char* buffer, int len);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnHotKey(UINT nHotKeyId, UINT nKey1, UINT nKey2);
+	
+
+	template< typename Func> void Test3(Func func);
+	int Max(int a, int b);
 private:
 	char m_show_flag = 1;
 public:
-	afx_msg void OnBnClickedButton15();
-	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnBnClickedButton16();
-	afx_msg void OnBnClickedButton17();
+	CTEST3* m_pTest1 = nullptr;
+	CUnitSerial* m_pSerial = nullptr;
+	
+	afx_msg void OnBnClickedButton23();
 };
 
 

@@ -1,5 +1,5 @@
-
-// TestDlg.cpp : ±¸Çö ÆÄÀÏ
+ï»¿
+// TestDlg.cpp : êµ¬í˜„ íŒŒì¼
 //
 
 #include "stdafx.h"
@@ -10,6 +10,14 @@
 #include <list>
 #include "TEST1.h"
 #include "Distance.h"
+#include "json\include\json.h"
+#include "UnitSerial.h"
+#include <algorithm>
+#include <sstream> 
+#include <string.h>
+
+
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -18,22 +26,25 @@
 #define KILL(p)	{ if (p != nullptr) {	delete p; p = nullptr;	}}
 using namespace std;
 
-// ÀÀ¿ë ÇÁ·Î±×·¥ Á¤º¸¿¡ »ç¿ëµÇ´Â CAboutDlg ´ëÈ­ »óÀÚÀÔ´Ï´Ù.
+#define SQUARE(X)	((X) * (X))
+#define MAX(A,B)	(((A) > (B)) ? (A) : (B)) 
+
+// ì‘ìš© í”„ë¡œê·¸ë¨ ì •ë³´ì— ì‚¬ìš©ë˜ëŠ” CAboutDlg ëŒ€í™” ìƒìì…ë‹ˆë‹¤.
 
 class CAboutDlg : public CDialogEx
 {
 public:
 	CAboutDlg();
 
-// ´ëÈ­ »óÀÚ µ¥ÀÌÅÍÀÔ´Ï´Ù.
+// ëŒ€í™” ìƒì ë°ì´í„°ì…ë‹ˆë‹¤.
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
 	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV Áö¿øÀÔ´Ï´Ù.
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV ì§€ì›ì…ë‹ˆë‹¤.
 
-// ±¸ÇöÀÔ´Ï´Ù.
+// êµ¬í˜„ì…ë‹ˆë‹¤.
 protected:
 	DECLARE_MESSAGE_MAP()
 };
@@ -51,7 +62,7 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 END_MESSAGE_MAP()
 
 
-// CTestDlg ´ëÈ­ »óÀÚ
+// CTestDlg ëŒ€í™” ìƒì
 
 
 
@@ -59,6 +70,15 @@ CTestDlg::CTestDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_TEST_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+}
+
+CTestDlg::~CTestDlg()
+{
+	if (m_pSerial != nullptr)
+	{
+		delete m_pSerial;
+		m_pSerial = nullptr;
+	}
 }
 
 void CTestDlg::DoDataExchange(CDataExchange* pDX)
@@ -82,25 +102,32 @@ BEGIN_MESSAGE_MAP(CTestDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON10, &CTestDlg::OnBnClickedButton10)
 	ON_BN_CLICKED(IDC_BUTTON11, &CTestDlg::OnBnClickedButton11)
 	ON_BN_CLICKED(IDC_BUTTON12, &CTestDlg::OnBnClickedButton12)
-	ON_BN_CLICKED(IDC_BUTTON_13, &CTestDlg::OnBnClickedButton13)
-	ON_BN_CLICKED(IDC_BUTTON_14, &CTestDlg::OnBnClickedButton14)
+	ON_BN_CLICKED(IDC_BUTTON13, &CTestDlg::OnBnClickedButton13)
+	ON_BN_CLICKED(IDC_BUTTON14, &CTestDlg::OnBnClickedButton14)
 	ON_WM_HOTKEY()
 	ON_BN_CLICKED(IDC_BUTTON15, &CTestDlg::OnBnClickedButton15)
 	ON_WM_LBUTTONDOWN()
 	ON_BN_CLICKED(IDC_BUTTON16, &CTestDlg::OnBnClickedButton16)
 	ON_BN_CLICKED(IDC_BUTTON17, &CTestDlg::OnBnClickedButton17)
+	ON_BN_CLICKED(IDC_BUTTON18, &CTestDlg::OnBnClickedButton18)
+	ON_BN_CLICKED(IDC_BUTTON19, &CTestDlg::OnBnClickedButton19)
+	ON_BN_CLICKED(IDC_BUTTON20, &CTestDlg::OnBnClickedButton20)
+	ON_BN_CLICKED(IDC_BUTTON22, &CTestDlg::OnBnClickedButton22)
+	ON_BN_CLICKED(IDC_BUTTON21, &CTestDlg::OnBnClickedButton21)
+	ON_BN_CLICKED(IDC_BUTTON23, &CTestDlg::OnBnClickedButton23)
+	ON_BN_CLICKED(IDC_BUTTON24, &CTestDlg::OnBnClickedButton24)
 END_MESSAGE_MAP()
 
 
-// CTestDlg ¸Ş½ÃÁö Ã³¸®±â
+// CTestDlg ë©”ì‹œì§€ ì²˜ë¦¬ê¸°
 
 BOOL CTestDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	// ½Ã½ºÅÛ ¸Ş´º¿¡ "Á¤º¸..." ¸Ş´º Ç×¸ñÀ» Ãß°¡ÇÕ´Ï´Ù.
+	// ì‹œìŠ¤í…œ ë©”ë‰´ì— "ì •ë³´..." ë©”ë‰´ í•­ëª©ì„ ì¶”ê°€í•©ë‹ˆë‹¤.
 
-	// IDM_ABOUTBOX´Â ½Ã½ºÅÛ ¸í·É ¹üÀ§¿¡ ÀÖ¾î¾ß ÇÕ´Ï´Ù.
+	// IDM_ABOUTBOXëŠ” ì‹œìŠ¤í…œ ëª…ë ¹ ë²”ìœ„ì— ìˆì–´ì•¼ í•©ë‹ˆë‹¤.
 	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
 	ASSERT(IDM_ABOUTBOX < 0xF000);
 
@@ -118,20 +145,20 @@ BOOL CTestDlg::OnInitDialog()
 		}
 	}
 
-	// ÀÌ ´ëÈ­ »óÀÚÀÇ ¾ÆÀÌÄÜÀ» ¼³Á¤ÇÕ´Ï´Ù.  ÀÀ¿ë ÇÁ·Î±×·¥ÀÇ ÁÖ Ã¢ÀÌ ´ëÈ­ »óÀÚ°¡ ¾Æ´Ò °æ¿ì¿¡´Â
-	//  ÇÁ·¹ÀÓ¿öÅ©°¡ ÀÌ ÀÛ¾÷À» ÀÚµ¿À¸·Î ¼öÇàÇÕ´Ï´Ù.
-	SetIcon(m_hIcon, TRUE);			// Å« ¾ÆÀÌÄÜÀ» ¼³Á¤ÇÕ´Ï´Ù.
-	SetIcon(m_hIcon, FALSE);		// ÀÛÀº ¾ÆÀÌÄÜÀ» ¼³Á¤ÇÕ´Ï´Ù.
+	// ì´ ëŒ€í™” ìƒìì˜ ì•„ì´ì½˜ì„ ì„¤ì •í•©ë‹ˆë‹¤.  ì‘ìš© í”„ë¡œê·¸ë¨ì˜ ì£¼ ì°½ì´ ëŒ€í™” ìƒìê°€ ì•„ë‹ ê²½ìš°ì—ëŠ”
+	//  í”„ë ˆì„ì›Œí¬ê°€ ì´ ì‘ì—…ì„ ìë™ìœ¼ë¡œ ìˆ˜í–‰í•©ë‹ˆë‹¤.
+	SetIcon(m_hIcon, TRUE);			// í° ì•„ì´ì½˜ì„ ì„¤ì •í•©ë‹ˆë‹¤.
+	SetIcon(m_hIcon, FALSE);		// ì‘ì€ ì•„ì´ì½˜ì„ ì„¤ì •í•©ë‹ˆë‹¤.
 
-	// ½Ã½ºÅÛ Àü¿ªÀ¸·Î »ç¿ë
-	// 0Àº PAUSE KEY 
+	// ì‹œìŠ¤í…œ ì „ì—­ìœ¼ë¡œ ì‚¬ìš©
+	// 0ì€ PAUSE KEY 
 	RegisterHotKey(m_hWnd,2600,0,VK_PAUSE);
 	SetLayeredWindowAttributes(RGB(255, 1, 7), 0, LWA_COLORKEY);
-	// MOD_SHIFT Á¶ÇÕÅ° µ¿½Ã ´©¸£´Â °æ¿ì
+	// MOD_SHIFT ì¡°í•©í‚¤ ë™ì‹œ ëˆ„ë¥´ëŠ” ê²½ìš°
 	//RegisterHotKey(m_hWnd, 26000, MOD_SHIFT );
 
 
-	return TRUE;  // Æ÷Ä¿½º¸¦ ÄÁÆ®·Ñ¿¡ ¼³Á¤ÇÏÁö ¾ÊÀ¸¸é TRUE¸¦ ¹İÈ¯ÇÕ´Ï´Ù.
+	return TRUE;  // í¬ì»¤ìŠ¤ë¥¼ ì»¨íŠ¸ë¡¤ì— ì„¤ì •í•˜ì§€ ì•Šìœ¼ë©´ TRUEë¥¼ ë°˜í™˜í•©ë‹ˆë‹¤.
 }
 
 void CTestDlg::OnSysCommand(UINT nID, LPARAM lParam)
@@ -147,20 +174,20 @@ void CTestDlg::OnSysCommand(UINT nID, LPARAM lParam)
 	}
 }
 
-// ´ëÈ­ »óÀÚ¿¡ ÃÖ¼ÒÈ­ ´ÜÃß¸¦ Ãß°¡ÇÒ °æ¿ì ¾ÆÀÌÄÜÀ» ±×¸®·Á¸é
-//  ¾Æ·¡ ÄÚµå°¡ ÇÊ¿äÇÕ´Ï´Ù.  ¹®¼­/ºä ¸ğµ¨À» »ç¿ëÇÏ´Â MFC ÀÀ¿ë ÇÁ·Î±×·¥ÀÇ °æ¿ì¿¡´Â
-//  ÇÁ·¹ÀÓ¿öÅ©¿¡¼­ ÀÌ ÀÛ¾÷À» ÀÚµ¿À¸·Î ¼öÇàÇÕ´Ï´Ù.
+// ëŒ€í™” ìƒìì— ìµœì†Œí™” ë‹¨ì¶”ë¥¼ ì¶”ê°€í•  ê²½ìš° ì•„ì´ì½˜ì„ ê·¸ë¦¬ë ¤ë©´
+//  ì•„ë˜ ì½”ë“œê°€ í•„ìš”í•©ë‹ˆë‹¤.  ë¬¸ì„œ/ë·° ëª¨ë¸ì„ ì‚¬ìš©í•˜ëŠ” MFC ì‘ìš© í”„ë¡œê·¸ë¨ì˜ ê²½ìš°ì—ëŠ”
+//  í”„ë ˆì„ì›Œí¬ì—ì„œ ì´ ì‘ì—…ì„ ìë™ìœ¼ë¡œ ìˆ˜í–‰í•©ë‹ˆë‹¤.
 
 void CTestDlg::OnPaint()
 {
-	CPaintDC dc(this); // ±×¸®±â¸¦ À§ÇÑ µğ¹ÙÀÌ½º ÄÁÅØ½ºÆ®ÀÔ´Ï´Ù.
+	CPaintDC dc(this); // ê·¸ë¦¬ê¸°ë¥¼ ìœ„í•œ ë””ë°”ì´ìŠ¤ ì»¨í…ìŠ¤íŠ¸ì…ë‹ˆë‹¤.
 	if (IsIconic())
 	{
-		//CPaintDC dc(this); // ±×¸®±â¸¦ À§ÇÑ µğ¹ÙÀÌ½º ÄÁÅØ½ºÆ®ÀÔ´Ï´Ù.
+		//CPaintDC dc(this); // ê·¸ë¦¬ê¸°ë¥¼ ìœ„í•œ ë””ë°”ì´ìŠ¤ ì»¨í…ìŠ¤íŠ¸ì…ë‹ˆë‹¤.
 
 		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
 
-		// Å¬¶óÀÌ¾ğÆ® »ç°¢Çü¿¡¼­ ¾ÆÀÌÄÜÀ» °¡¿îµ¥¿¡ ¸ÂÃä´Ï´Ù.
+		// í´ë¼ì´ì–¸íŠ¸ ì‚¬ê°í˜•ì—ì„œ ì•„ì´ì½˜ì„ ê°€ìš´ë°ì— ë§ì¶¥ë‹ˆë‹¤.
 		int cxIcon = GetSystemMetrics(SM_CXICON);
 		int cyIcon = GetSystemMetrics(SM_CYICON);
 		CRect rect;
@@ -168,7 +195,7 @@ void CTestDlg::OnPaint()
 		int x = (rect.Width() - cxIcon + 1) / 2;
 		int y = (rect.Height() - cyIcon + 1) / 2;
 
-		// ¾ÆÀÌÄÜÀ» ±×¸³´Ï´Ù.
+		// ì•„ì´ì½˜ì„ ê·¸ë¦½ë‹ˆë‹¤.
 		dc.DrawIcon(x, y, m_hIcon);
 	}
 	else
@@ -178,8 +205,8 @@ void CTestDlg::OnPaint()
 	}
 }
 
-// »ç¿ëÀÚ°¡ ÃÖ¼ÒÈ­µÈ Ã¢À» ²ô´Â µ¿¾È¿¡ Ä¿¼­°¡ Ç¥½ÃµÇµµ·Ï ½Ã½ºÅÛ¿¡¼­
-//  ÀÌ ÇÔ¼ö¸¦ È£ÃâÇÕ´Ï´Ù.
+// ì‚¬ìš©ìê°€ ìµœì†Œí™”ëœ ì°½ì„ ë„ëŠ” ë™ì•ˆì— ì»¤ì„œê°€ í‘œì‹œë˜ë„ë¡ ì‹œìŠ¤í…œì—ì„œ
+//  ì´ í•¨ìˆ˜ë¥¼ í˜¸ì¶œí•©ë‹ˆë‹¤.
 HCURSOR CTestDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
@@ -223,9 +250,9 @@ void CTestDlg::OnBnClickedButton2()
 // 	liStr.push_back(_T("2"));
 
 
-	// ÀÌÀü ¹æ½Ä
+	// ì´ì „ ë°©ì‹
 	//vector<int>::iterator iter2 = vecStr.begin();
-	// ¹İº¹
+	// ë°˜ë³µ
 // 	for (list<CString>::iterator iter = vecStr.begin(); iter != vecStr.end(); ++iter)
 // 	{
 // 
@@ -235,7 +262,7 @@ void CTestDlg::OnBnClickedButton2()
 	TRACE(_T("%d \n"), iter);
 
 
-	// º¹»ç¸¦ ÇÇÇÏ°í ½Í´Ù¸é
+	// ë³µì‚¬ë¥¼ í”¼í•˜ê³  ì‹¶ë‹¤ë©´
 // 	for (auto &i: liStr)
 // 	{
 // 		CString szA(_T("7"));
@@ -243,7 +270,7 @@ void CTestDlg::OnBnClickedButton2()
 // 		AfxMessageBox(szA);
 // 	}
 
-	// °ª º¯°æÀ» ¹æÁöÇÏ°í ½Í´Ù¸é
+	// ê°’ ë³€ê²½ì„ ë°©ì§€í•˜ê³  ì‹¶ë‹¤ë©´
 // 	for (auto const &i : liStr)
 // 	{
 // 		CString szA(_T("7"));
@@ -251,22 +278,22 @@ void CTestDlg::OnBnClickedButton2()
 // 		AfxMessageBox(i);
 // 	}
 
-	// °ª º¯°æ, º¹»ç ¹æÁö
+	// ê°’ ë³€ê²½, ë³µì‚¬ ë°©ì§€
 	for (auto const &i : liStr)
 	{
 		CString szA = i;
 		AfxMessageBox(szA);
 	}
 
-	//pop_front() : ¸®½ºÆ® Á¦ÀÏ ¾Õ¿¡ ¿ø¼Ò »èÁ¦
-	//pop_back() : ¸®½ºÆ® Á¦ÀÏ µÚ¿¡ ¿ø¼Ò »èÁ¦ 
+	//pop_front() : ë¦¬ìŠ¤íŠ¸ ì œì¼ ì•ì— ì›ì†Œ ì‚­ì œ
+	//pop_back() : ë¦¬ìŠ¤íŠ¸ ì œì¼ ë’¤ì— ì›ì†Œ ì‚­ì œ 
 }
 
 
 void CTestDlg::OnBnClickedButton3()
 {
-//auto f(); // ÇÔ¼ö f() ¼±¾ğ,¹İÈ¯ °ª Å¸ÀÔÀº ºÒÆò
-//auto f() { return 1; } // ÇÔ¼ö f()ÀÇ ¹İÈ¯ °ªÀº int
+//auto f(); // í•¨ìˆ˜ f() ì„ ì–¸,ë°˜í™˜ ê°’ íƒ€ì…ì€ ë¶ˆí‰
+//auto f() { return 1; } // í•¨ìˆ˜ f()ì˜ ë°˜í™˜ ê°’ì€ int
 
 // 	int x = 3;
 // 	auto& f() { return x; }
@@ -299,12 +326,12 @@ void CTestDlg::OnBnClickedButton4()
 	};
 
 	CHARACTER_CLASS CharClass = CHARACTER_CLASS::WARRIOR;
-	//short charClassType = FIGHTER; //¿¡·¯
+	//short charClassType = FIGHTER; //ì—ëŸ¬
 
-	//unscoped enumerationÀÇ Çü º¯È¯
+	//unscoped enumerationì˜ í˜• ë³€í™˜
 	int i1 = WEAPON;
 
-	// scoped enumerationÀÇ Çü º¯È¯
+	// scoped enumerationì˜ í˜• ë³€í™˜
 	int i2 = static_cast<int>(CHARACTER_CLASS::WARRIOR);
 
 	return;
@@ -317,7 +344,7 @@ void CTestDlg::OnBnClickedButton5()
 	//int value1 = rand(); // 0 ~ 100 
 	//int value2 = rand() % 101;
 	
-	//Mersenne twister(32ºñÆ® ¹öÀü) °ú std::mt19937_64(64ºñÆ® ¹öÀü)
+	//Mersenne twister(32ë¹„íŠ¸ ë²„ì „) ê³¼ std::mt19937_64(64ë¹„íŠ¸ ë²„ì „)
 
 	std::mt19937 mtRand;
 	std::vector<int> vecint;
@@ -346,11 +373,11 @@ void CTestDlg::OnBnClickedButton5()
 
 	random_device rd;
 	std::vector<__int64> rn;
-	//ÀÇ»ç ³­ »ı¼º ¿£ÁøÀÇ ½Ãµå ÃÊ±âÈ­·Î random_device °ª
+	//ì˜ì‚¬ ë‚œ ìƒì„± ì—”ì§„ì˜ ì‹œë“œ ì´ˆê¸°í™”ë¡œ random_device ê°’
 	mt19937_64 m_rng(rd()); 
-	// -3°ú 3»çÀÌÀÇ °ªÀ» °¡Áü
-	//uniform_int_distribution Á¤¼ö Å¸ÀÔ
-	//uniform_real_distribution ½ÇÁ¤ Å¸ÀÔ
+	// -3ê³¼ 3ì‚¬ì´ì˜ ê°’ì„ ê°€ì§
+	//uniform_int_distribution ì •ìˆ˜ íƒ€ì…
+	//uniform_real_distribution ì‹¤ì • íƒ€ì…
 	uniform_int_distribution<__int64> dist1(-3, 3); 
 	
 	for (auto i = 0; i < 5; i++)
@@ -367,18 +394,18 @@ void CTestDlg::OnBnClickedButton6()
 {
 	double d = 11.1;
 	auto m_pTest3 = new TEST3();
-	//m_pTest3->f(d); //ÄÄÆÄÀÏ ¿¡·¯
+	//m_pTest3->f(d); //ì»´íŒŒì¼ ì—ëŸ¬
 	KILL(m_pTest3);
 }
 
 void CTestDlg::OnBnClickedButton7()
 {
-	// override¶ó´Â Å°¿öµå¸¦ »ç¿ëÇÏ¿© ÄÄÆÄÀÏ·¯¿¡°Ô ºÎ¸ğ 
-	// Å¬·¡½ºÀÇ ¸â¹ö ÇÔ¼ö¸¦ Àç Á¤ÀÇ ÇÔÀ» ¾Ë¸°´Ù.
+	// overrideë¼ëŠ” í‚¤ì›Œë“œë¥¼ ì‚¬ìš©í•˜ì—¬ ì»´íŒŒì¼ëŸ¬ì—ê²Œ ë¶€ëª¨ 
+	// í´ë˜ìŠ¤ì˜ ë©¤ë²„ í•¨ìˆ˜ë¥¼ ì¬ ì •ì˜ í•¨ì„ ì•Œë¦°ë‹¤.
 
 	// final
-	// ºÎ¸ğ Å¬·¡½ºÀÇ Æ¯Á¤ ¸â¹ö ÇÔ¼ö¸¦ ÀÚ½Ä Å¬·¡½º¿¡¼­
-	// ÀçÁ¤ÀÇ ÇÏÁö ¸øÇÏ´Ù·Ï ¸·À»¶§ »ç¿ëÇÑ´Ù
+	// ë¶€ëª¨ í´ë˜ìŠ¤ì˜ íŠ¹ì • ë©¤ë²„ í•¨ìˆ˜ë¥¼ ìì‹ í´ë˜ìŠ¤ì—ì„œ
+	// ì¬ì •ì˜ í•˜ì§€ ëª»í•˜ë‹¤ë¡ ë§‰ì„ë•Œ ì‚¬ìš©í•œë‹¤
 
 // 	struct Base
 // 	{
@@ -388,7 +415,7 @@ void CTestDlg::OnBnClickedButton7()
 // 	struct Derived : Base
 // 	{
 // 		virtual void foo(int i) override;
-// 		//virtual void foo(int i) override; // ÄÄÆÄÀÏ ¿¡·¯ ¹ß»ı
+// 		//virtual void foo(int i) override; // ì»´íŒŒì¼ ì—ëŸ¬ ë°œìƒ
 // 	};
 
 // 	struct Base
@@ -398,7 +425,7 @@ void CTestDlg::OnBnClickedButton7()
 // 
 // 	struct Derived : Base
 // 	{
-// 		virtual void foo(int i) override; // ÄÄÆÄÀÏ ¿¡·¯ ¹ß»ı
+// 		virtual void foo(int i) override; // ì»´íŒŒì¼ ì—ëŸ¬ ë°œìƒ
 // 	};
 
 
@@ -432,9 +459,9 @@ void CTestDlg::OnBnClickedButton8()
 
 void CTestDlg::OnBnClickedButton9()
 {
-	//constexpr´Â º¯¼ö,ÇÔ¼ö,Å¬·¡½º¸¦ ÄÄÆÄÀÏ Å¸ÀÓ¿¡ Á¤¼ö·Î »ç¿ëÇÒ ¼ö ÀÖ´Ù.
-	// Áï »ó¼ö·Î Ãë±ŞÇÒ ¼ö ÀÖ´Â ÀÛ¾÷À» ÄÄÆÄÀÏ Å¸ÀÓ¿¡ Ã³¸®
-	// #define  ÀÌ³ª ÅÛÇÃ¸´À» ´ëÃ¼ ÇÒ ¼ö ÀÖ´Ù.
+	//constexprëŠ” ë³€ìˆ˜,í•¨ìˆ˜,í´ë˜ìŠ¤ë¥¼ ì»´íŒŒì¼ íƒ€ì„ì— ì •ìˆ˜ë¡œ ì‚¬ìš©í•  ìˆ˜ ìˆë‹¤.
+	// ì¦‰ ìƒìˆ˜ë¡œ ì·¨ê¸‰í•  ìˆ˜ ìˆëŠ” ì‘ì—…ì„ ì»´íŒŒì¼ íƒ€ì„ì— ì²˜ë¦¬
+	// #define  ì´ë‚˜ í…œí”Œë¦¿ì„ ëŒ€ì²´ í•  ìˆ˜ ìˆë‹¤.
 
 	double a = pow1(2.0, 2);
 	double b = pow1(3.0, 6);
@@ -454,18 +481,18 @@ void CTestDlg::Test3(Func func)
 
 void CTestDlg::OnBnClickedButton10()
 {
-	// lambda ÇÔ¼ö ¶Ç´Â ¹«¸í ÇÔ¼ö ¶ó°í ºÎ¸£±âµµ ÇÑ´Ù.
-	// lambda´Â ÇÔ¼ö ¿ÀºêÁ§Æ® ÀÌ´Ù
+	// lambda í•¨ìˆ˜ ë˜ëŠ” ë¬´ëª… í•¨ìˆ˜ ë¼ê³  ë¶€ë¥´ê¸°ë„ í•œë‹¤.
+	// lambdaëŠ” í•¨ìˆ˜ ì˜¤ë¸Œì íŠ¸ ì´ë‹¤
 
 	//[] lambda capture
-	//() ÇÔ¼öÀÇ ÀÎ¼öÁ¤ÀÇ
-	//{} ÇÔ¼öÀÇ º»Ã¼
-	//() ÇÔ¼ö È£Ãâ
+	//() í•¨ìˆ˜ì˜ ì¸ìˆ˜ì •ì˜
+	//{} í•¨ìˆ˜ì˜ ë³¸ì²´
+	//() í•¨ìˆ˜ í˜¸ì¶œ
 
 	CString strLog(_T(""));
-	[] { AfxMessageBox(_T("¾È³ç")); }();
+	[] { AfxMessageBox(_T("ì•ˆë…•")); }();
 
-	auto func = [] { AfxMessageBox(_T("¶÷´Ù")); };
+	auto func = [] { AfxMessageBox(_T("ëŒë‹¤")); };
 	func();
 	Test3(func);
 
@@ -494,17 +521,24 @@ void CTestDlg::OnBnClickedButton10()
 	v1.push_back(20);
 	v1.push_back(30);
 
+	CString str = _T("");
+	str.Format(_T(""));
+
+
+
 	//std::for_each(v1.begin(), v1.end(), [](int n) {};);
+
+	//for each(v1.begin(), v1.end(), [](int n) {};);
 }
 
 void CTestDlg::OnBnClickedButton11()
 {
-	// lambda¸¦ Á¤ÀÇÇÑ scope ³»ÀÇ º¯¼ö¸¦ capture ÇÒ ¼ö ÀÖ´Ù.
-	// ¸ğµç º¯¼ö¸¦ ÂüÁ¶·Î capture ÇÒ ¶§´Â [&], Æ¯Á¤ º¯¼ö¸¸ ÂüÁ¶·Î 
-	// capture ÇÒ ¶§´Â[&º¯¼ö]
+	// lambdaë¥¼ ì •ì˜í•œ scope ë‚´ì˜ ë³€ìˆ˜ë¥¼ capture í•  ìˆ˜ ìˆë‹¤.
+	// ëª¨ë“  ë³€ìˆ˜ë¥¼ ì°¸ì¡°ë¡œ capture í•  ë•ŒëŠ” [&], íŠ¹ì • ë³€ìˆ˜ë§Œ ì°¸ì¡°ë¡œ 
+	// capture í•  ë•ŒëŠ”[&ë³€ìˆ˜]
 
-	// ¸ğµç º¯¼ö¸¦ º¹»ç·Î capyure ÇÒ ¶§´Â [=], Æ¯Á¤ º¯¼ö¸¸ º¹¼ö·Î
-	// capture ÇÒ ¶§´Â[º¯¼ö]
+	// ëª¨ë“  ë³€ìˆ˜ë¥¼ ë³µì‚¬ë¡œ capyure í•  ë•ŒëŠ” [=], íŠ¹ì • ë³€ìˆ˜ë§Œ ë³µìˆ˜ë¡œ
+	// capture í•  ë•ŒëŠ”[ë³€ìˆ˜]
 
 	CString strLog(_T(""));
 
@@ -521,21 +555,21 @@ void CTestDlg::OnBnClickedButton11()
 	strLog.Format(_T("%d"), x);
 	AfxMessageBox(strLog);}();
 
-	//Error ¹ß»ı
+	//Error ë°œìƒ
 // 	[=]() {CString strLog(_T(""));
 // 	strLog.Format(_T("%d"), x);
 // 	AfxMessageBox(strLog);
 // 	x = 200; }();
 
-	// ¶÷´Ù º¹»ç °¡´É º¯¼ö°ª º¯°æ
+	// ëŒë‹¤ ë³µì‚¬ ê°€ëŠ¥ ë³€ìˆ˜ê°’ ë³€ê²½
 	[=]() mutable{CString strLog(_T(""));
 	strLog.Format(_T("%d"), x);
 	AfxMessageBox(strLog);
 	x = 200; }();
 
-	// genericÇÑ Çü Ç¥Çö
-	//decltypeÀº declared type(¼±¾ğµÈ Çü½Ä)ÀÇ ÁÙÀÓ¸»·Î½á,
-	//ÁÖ¾îÁø ÀÌ¸§ÀÌ³ª Ç¥Çö½ÄÀÇ ±¸Ã¼ÀûÀÎ Å¸ÀÔÀ» ¾Ë·ÁÁÖ´Â Å°¿öµåÀÌ´Ù.
+	// genericí•œ í˜• í‘œí˜„
+	//decltypeì€ declared type(ì„ ì–¸ëœ í˜•ì‹)ì˜ ì¤„ì„ë§ë¡œì¨,
+	//ì£¼ì–´ì§„ ì´ë¦„ì´ë‚˜ í‘œí˜„ì‹ì˜ êµ¬ì²´ì ì¸ íƒ€ì…ì„ ì•Œë ¤ì£¼ëŠ” í‚¤ì›Œë“œì´ë‹¤.
 	//auto Sum = [](auto a, decltype(a) b) { return a + b; };
 
 }
@@ -549,6 +583,23 @@ void CTestDlg::OnBnClickedButton12()
 // 			//AfxMessageBox();
 // 		}
 // 	});
+
+	int num;
+	string str = "123 456";
+	stringstream stream;
+	stream.str(str);
+	vector<int> v;
+
+	while (!stream.eof()) {
+		stream >> num;
+		v.push_back(num);
+	}
+	int a = 0;
+	//1) ë¬¸ìì—´ì„ ë‚˜ëˆ„ëŠ” stringstream
+	//C++ì—ì„œ stringstreamì€ ì£¼ì–´ì§„ ë¬¸ìì—´ì—ì„œ í•„ìš”í•œ ìë£Œí˜•ì— ë§ëŠ” ì •ë³´ë¥¼ êº¼ë‚¼ ë•Œ ìœ ìš©í•˜ê²Œ ì‚¬ìš©ë©ë‹ˆë‹¤.
+	//stringstreamì—ì„œ ê³µë°±ê³¼ '\n'ì„ ì œì™¸í•˜ê³  ë¬¸ìì—´ì—ì„œ ë§ëŠ” ìë£Œí˜•ì˜ ì •ë³´ë¥¼ ë¹¼ëƒ…ë‹ˆë‹¤.
+
+
 }
 
 
@@ -557,17 +608,17 @@ void CTestDlg::OnBnClickedButton13()
 	CString str, total_Str;
 	int ctrl_id;
 
-	// ¿øµµ¿ì Å¬·¡½º³ª ÄÁÆ®·ÑÀÇ Á¦¸ñ°ú »ó°ü¾øÀÌ ¸¸µé¾îÁø ¸ğµç ÀÚ½Ä ¿øµµ¿ì Å½»ö!!
+	// ì›ë„ìš° í´ë˜ìŠ¤ë‚˜ ì»¨íŠ¸ë¡¤ì˜ ì œëª©ê³¼ ìƒê´€ì—†ì´ ë§Œë“¤ì–´ì§„ ëª¨ë“  ìì‹ ì›ë„ìš° íƒìƒ‰!!
 	HWND h_wnd = ::FindWindowEx(m_hWnd, NULL, NULL, NULL);
 
 	while (NULL != h_wnd){
-		// Ã£Àº ¿øµµ¿ìÀÇ ÄÁÆ®·Ñ ID¸¦ ¾ò´Â´Ù.
+		// ì°¾ì€ ì›ë„ìš°ì˜ ì»¨íŠ¸ë¡¤ IDë¥¼ ì–»ëŠ”ë‹¤.
 		ctrl_id = ::GetDlgCtrlID(h_wnd);
-		// Á¤¼ö ÇüÅÂÀÇ ID¸¦ ¹®ÀÚ¿­ ÇüÅÂ·Î º¯°æÇÑ´Ù.
+		// ì •ìˆ˜ í˜•íƒœì˜ IDë¥¼ ë¬¸ìì—´ í˜•íƒœë¡œ ë³€ê²½í•œë‹¤.
 		str.Format(_T("%d, "), ctrl_id);
-		// ¹®ÀÚ¿­·Î º¯°æµÈ ID °ªÀ» ÇÕÄ£´Ù.
+		// ë¬¸ìì—´ë¡œ ë³€ê²½ëœ ID ê°’ì„ í•©ì¹œë‹¤.
 		total_Str += str;
-		// ´ÙÀ½ ÀÚ½Ä ¿øµµ¿ì¸¦ Å½»öÇÑ´Ù.
+		// ë‹¤ìŒ ìì‹ ì›ë„ìš°ë¥¼ íƒìƒ‰í•œë‹¤.
 		h_wnd = ::FindWindowEx(m_hWnd, h_wnd, NULL, NULL);
 	}
 	AfxMessageBox(total_Str);
@@ -577,13 +628,13 @@ void CTestDlg::OnBnClickedButton13()
 
 void CTestDlg::OnBnClickedButton14()
 {
-	// TODO: ¿©±â¿¡ ÄÁÆ®·Ñ ¾Ë¸² Ã³¸®±â ÄÚµå¸¦ Ãß°¡ÇÕ´Ï´Ù.
+	// TODO: ì—¬ê¸°ì— ì»¨íŠ¸ë¡¤ ì•Œë¦¼ ì²˜ë¦¬ê¸° ì½”ë“œë¥¼ ì¶”ê°€í•©ë‹ˆë‹¤.
 }
 
 
 void CTestDlg::OnHotKey(UINT nHotKeyId, UINT nKey1, UINT nKey2)
 {
-	if (nHotKeyId == 2600) { //Pauese Å°¸¦ ´­·¶´Ù.!
+	if (nHotKeyId == 2600) { //Pauese í‚¤ë¥¼ ëˆŒë €ë‹¤.!
 		if (m_show_flag == 1) ShowWindow(SW_HIDE);
 		else ShowWindow(SW_SHOW);
 		m_show_flag = !m_show_flag;
@@ -595,13 +646,13 @@ void CTestDlg::OnHotKey(UINT nHotKeyId, UINT nKey1, UINT nKey2)
 
 void CTestDlg::OnBnClickedButton15()
 {
-	//dlg ¼Ó¼º¿¡¼­ layered True ¼Ó¼ºÀ¸·Î º¯°æÇÑ´Ù.
+	//dlg ì†ì„±ì—ì„œ layered True ì†ì„±ìœ¼ë¡œ ë³€ê²½í•œë‹¤.
 	
-	// ÇöÀç ¿øµµ¿ìÀÇ È®Àå ¼Ó¼º Á¤º¸¸¦ ¾ò´Â´Ù!
+	// í˜„ì¬ ì›ë„ìš°ì˜ í™•ì¥ ì†ì„± ì •ë³´ë¥¼ ì–»ëŠ”ë‹¤!
 	int wnd_style = ::GetWindowLong(m_hWnd, GWL_EXSTYLE);
-	// ÇöÀç È®Àå ¼Ó¼º Á¤º¸¿¡ WS_EX_LAYERED ¼Ó¼ºÀÌ ¾ø´ÂÁö Ã¼Å©ÇÑ´Ù.!
+	// í˜„ì¬ í™•ì¥ ì†ì„± ì •ë³´ì— WS_EX_LAYERED ì†ì„±ì´ ì—†ëŠ”ì§€ ì²´í¬í•œë‹¤.!
 	if (!(wnd_style & WS_EX_LAYERED)){
-		// ÇöÀç È®Àå ¼Ó¼º Á¤º¸¿¡ WS_EX_LAYERED ¼Ó¼ºÀ» ¼³Á¤ÇÑ´Ù.
+		// í˜„ì¬ í™•ì¥ ì†ì„± ì •ë³´ì— WS_EX_LAYERED ì†ì„±ì„ ì„¤ì •í•œë‹¤.
 		::SetWindowLong(m_hWnd, GWL_EXSTYLE, wnd_style | WS_EX_LAYERED);
 	}
 	SetLayeredWindowAttributes(RGB(255, 1, 7), 0, LWA_COLORKEY);
@@ -613,11 +664,11 @@ void CTestDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	CClientDC dc(this);
 	dc.FillSolidRect(point.x - 10, point.y - 10, 20, 20, RGB(255, 1, 7));
 // 
-// 	// ÇöÀç ¿øµµ¿ìÀÇ È®Àå ¼Ó¼º Á¤º¸¸¦ ¾ò´Â´Ù!
+// 	// í˜„ì¬ ì›ë„ìš°ì˜ í™•ì¥ ì†ì„± ì •ë³´ë¥¼ ì–»ëŠ”ë‹¤!
 // 	int wnd_style = ::GetWindowLong(m_hWnd, GWL_EXSTYLE);
-// 	// ÇöÀç È®Àå ¼Ó¼º Á¤º¸¿¡ WS_EX_LAYERED ¼Ó¼ºÀÌ ¾ø´ÂÁö Ã¼Å©ÇÑ´Ù.!
+// 	// í˜„ì¬ í™•ì¥ ì†ì„± ì •ë³´ì— WS_EX_LAYERED ì†ì„±ì´ ì—†ëŠ”ì§€ ì²´í¬í•œë‹¤.!
 // 	if (!(wnd_style & WS_EX_LAYERED)){
-// 		// ÇöÀç È®Àå ¼Ó¼º Á¤º¸¿¡ WS_EX_LAYERED ¼Ó¼ºÀ» ¼³Á¤ÇÑ´Ù.
+// 		// í˜„ì¬ í™•ì¥ ì†ì„± ì •ë³´ì— WS_EX_LAYERED ì†ì„±ì„ ì„¤ì •í•œë‹¤.
 // 		::SetWindowLong(m_hWnd, GWL_EXSTYLE, wnd_style | WS_EX_LAYERED);
 // 	}
 // 	SetLayeredWindowAttributes(RGB(255, 1, 7), 0, LWA_COLORKEY);
@@ -627,9 +678,9 @@ void CTestDlg::OnLButtonDown(UINT nFlags, CPoint point)
 #include <math.h>
 void CTestDlg::OnBnClickedButton16()
 {
-	// Ã¹ ¹øÂ° ÁÂÇ¥ (X, Y)ÀÇ X°ª°ú Y°ªÀ» ÀÔ·Â ÇÏ¼¼¿ä : 52 76
-	// µÎ ¹øÂ° ÁÂÇ¥ (X, Y)ÀÇ X°ª°ú Y°ªÀ» ÀÔ·Â ÇÏ¼¼¿ä : 88 92
-	// µÎ Á¡ÀÇ °Å¸®´Â 39.3954
+	// ì²« ë²ˆì§¸ ì¢Œí‘œ (X, Y)ì˜ Xê°’ê³¼ Yê°’ì„ ì…ë ¥ í•˜ì„¸ìš” : 52 76
+	// ë‘ ë²ˆì§¸ ì¢Œí‘œ (X, Y)ì˜ Xê°’ê³¼ Yê°’ì„ ì…ë ¥ í•˜ì„¸ìš” : 88 92
+	// ë‘ ì ì˜ ê±°ë¦¬ëŠ” 39.3954
 
 
 
@@ -643,7 +694,7 @@ void CTestDlg::OnBnClickedButton16()
 // 	y1 = GetDlgItemInt(IDC_EDIT_Y1);
 // 	y2 = GetDlgItemInt(IDC_EDIT_Y2);
 
-	//µÎ ÁÂÇ¥ »çÀÌÀÇ °Å¸®¸¦ ±¸ÇÑ´Ù.
+	//ë‘ ì¢Œí‘œ ì‚¬ì´ì˜ ê±°ë¦¬ë¥¼ êµ¬í•œë‹¤.
 // 	distand = sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 // 	strVal.Format(_T("%f"), distand);
 // 	SetDlgItemText(IDC_STATIC_VAL, strVal);
@@ -667,8 +718,8 @@ void CTestDlg::OnBnClickedButton16()
 void CTestDlg::OnBnClickedButton17()
 {
 	CButton *pButton;
-	//reinterpret_cast ÀÓÀÇÀÇ Æ÷ÀÎÅÍ Å¸ÀÔ³¢¸® º¯È¯À» º¯È¯À» Çã¿ëÇÏ´Â Ä³½ºÆ® ¿¬»êÀÚ 
-	pButton = reinterpret_cast<CButton *>(GetDlgItem(IDC_BUTTON17)); // ¹öÆ°ÀÇ ³ĞÀÌ ±¸ÇÏ±â
+	//reinterpret_cast ì„ì˜ì˜ í¬ì¸í„° íƒ€ì…ë¼ë¦¬ ë³€í™˜ì„ ë³€í™˜ì„ í—ˆìš©í•˜ëŠ” ìºìŠ¤íŠ¸ ì—°ì‚°ì 
+	pButton = reinterpret_cast<CButton *>(GetDlgItem(IDC_BUTTON17)); // ë²„íŠ¼ì˜ ë„“ì´ êµ¬í•˜ê¸°
 
 	CRect ButtonRect;
 	pButton->GetWindowRect(&ButtonRect);
@@ -678,6 +729,248 @@ void CTestDlg::OnBnClickedButton17()
 	
 // 	if (ButtonRect.PtInRect(Point))
 // 	{
-// 		AfxMessageBox("¿ŞÂÊ ¹öÆ°À¸·Î ´©¸£¼Ì½À´Ï´Ù.")
+// 		AfxMessageBox("ì™¼ìª½ ë²„íŠ¼ìœ¼ë¡œ ëˆ„ë¥´ì…¨ìŠµë‹ˆë‹¤.")
 // 	}
+}
+
+int CTestDlg::Max(int a, int b)
+{
+	/*
+	if (a/b) return a;
+	return b;
+	*/
+	CString str(_T(""));
+	int r = (a > b) ? a : b;
+	str.Format(_T("%s"));
+	/*AfxMessageBox()*/
+	return (a > b) ? a : b;
+}
+
+void CTestDlg::OnBnClickedButton18()
+{
+	Json::Value root;
+	root["sed"];
+}
+
+
+void CTestDlg::OnBnClickedButton19()
+{
+	CString strdata = "1,2,3,4,5,,7,8,9,10,11";
+	CStringArray strArr;
+	vector<string> v;
+	int pos = 0;
+	CString resToken = strdata.Tokenize(_T(","), pos);
+	while (resToken != _T("")) {
+		strArr.Add(resToken.Trim());
+		v.emplace_back(resToken.Trim());
+		resToken = strdata.Tokenize(_T(","), pos);
+	}
+	
+	std::string strTest = "1,2,3,4,5,,6,8,,9";
+	char* cArr = "1,2,3,4,5,,6,8,,9";
+	char* cSep = ",";
+	char** pcArr = &cArr;
+	std::string strTemp;
+	std::vector<std::string> vstrTemp;
+	for (int i = 0; i < 9; i++)
+	{
+		strTemp = strTok(pcArr, cSep);
+		vstrTemp.emplace_back(strTemp);
+	}
+	CString str = strArr[0];
+}
+
+void CTestDlg::OnBnClickedButton20()
+{
+	if (m_pSerial != nullptr){
+		AfxMessageBox(_T("---ì´ë¯¸ ì—°ê²°ì¤‘ ì…ë‹ˆë‹¤.---"));
+		return;
+	}
+
+	m_pSerial = new CUnitSerial;
+}
+
+void CTestDlg::OnBnClickedButton21()
+{
+	if (m_pSerial != nullptr)
+	{
+		if (m_pSerial -> GetIsConnect()){
+			m_pSerial->SendData("222");
+		} else {
+			AfxMessageBox(_T("--- Com ì—°ê²° í•´ì£¼ì„¸ìš” ---"));
+		}
+		
+	}
+}
+
+
+void CTestDlg::OnBnClickedButton22()
+{
+	if (m_pSerial != nullptr)
+	{
+		m_pSerial->Disconnect();
+		m_pSerial = nullptr;
+	}
+		
+}
+
+void CTestDlg::OnBnClickedButton23()
+{
+ 	CString str(_T("    "));
+
+	int n = str.GetLength();
+
+	str.TrimRight();
+
+	if (str.IsEmpty() || str == "")	{
+		AfxMessageBox("IsEmpty ë°œìƒ");
+	}
+	else{
+		AfxMessageBox(str);
+	}
+}
+
+
+struct SumFunctor : public std::unary_function<int, void> {
+	SumFunctor(int& number) : sum(number) {}
+
+	void operator() (int& number) {
+		sum += number;
+	}
+
+private:
+	int& sum;
+};
+
+
+void CTestDlg::OnBnClickedButton24()
+{
+	std::list<int> numbers = { 1, 2, 3, 4, 5 };
+	//std::array<int, 5> numbers = { 1, 2, 3, 4, 5 };
+	int sum = 0;
+
+	//for each (auto var in numbers SumFunctor(sum));
+
+	for_each(numbers.begin(), numbers.end(), SumFunctor(sum));
+
+	sum = 0;
+
+	// lambdaë¡œ êµ¬í˜„
+	for_each(numbers.begin(), numbers.end(), [&sum](int& number) {
+		sum += number;
+	});
+
+// 
+// 	template <typename T>
+// 	struct product {
+// 		product(T& storage) : value(storage) {}
+// 		template <typename V>
+// 		void operator()(V& v) {
+// 			value *= v;
+// 		}
+// 		T& value;
+// 	};
+// 
+// 
+// 	int total_elements = 1;
+// 	for_each(numbers.begin(), numbers.end(), product<int>(total_elements));
+// 	
+
+	return ;
+}
+
+
+char* CTestDlg::strTok(char** newString, char* delimiter)
+{
+	char* string = *newString;
+	char* delimiterFound = (char*)0;
+	int tokLenght = 0;
+	char* tok = (char*)0;
+
+	if (!string) return (char*)0;
+
+	delimiterFound = strstr(string, delimiter);
+
+	if (delimiterFound)
+		tokLenght = delimiterFound - string;
+	else
+		tokLenght = strlen(string);
+
+	tok = new char[tokLenght + 1];
+	memcpy(tok, string, tokLenght);
+	tok[tokLenght] = '\0';
+
+	*newString = delimiterFound ? delimiterFound + strlen(delimiter) : (char*)0;
+
+	return tok;
+}
+
+bool CTestDlg::FileReadOnMemory(LPCSTR lpszPathName, char** lpcFileRead)
+{
+	DWORD dwFileSize;
+	HANDLE hFile, hFileMap;
+	LPVOID lpvFile;
+
+	hFile = ::CreateFile((LPCSTR)lpszPathName, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+	if (hFile == INVALID_HANDLE_VALUE)
+	{
+		//ADD EXCEPTION
+		return FALSE;
+	}
+
+	dwFileSize = ::GetFileSize(hFile, NULL);
+
+	hFileMap = CreateFileMapping(hFile, NULL, PAGE_WRITECOPY, 0, dwFileSize, NULL);
+
+	if (hFileMap == NULL)
+	{
+		CloseHandle(hFile);
+		//ADD EXCEPTION
+	}
+
+	lpvFile = MapViewOfFile(hFileMap, FILE_MAP_COPY, 0, 0, 0);
+	*lpcFileRead = (char *)lpvFile;
+
+	if (lpvFile != NULL)
+	{
+		CloseHandle(hFile);
+		CloseHandle(hFileMap);
+		//ADD EXCEPTION
+	}
+	lpvFile = NULL;
+
+	return TRUE;
+}
+
+
+bool CTestDlg::WriteToFile(const char* filename, const char* buffer, int len)
+{
+	FILE* fp = nullptr;
+	fopen_s(&fp, filename, _T("wb"));
+
+	if (fp == nullptr)
+	{
+		return false;
+	}
+
+	size_t fileSize = fwrite(buffer, 1, len, fp);
+
+	fclose(fp);
+
+	return true;
+}
+bool CTestDlg::ReadToFile(const char* filename, char* buffer, int len)
+{
+	FILE* fp = nullptr;
+	fopen_s(&fp, filename, _T("rb"));					//file open
+
+	if (fp == nullptr)
+		return false;
+
+	size_t fileSize = fread(buffer, 1, len, fp);	//get file size
+
+	fclose(fp);
+
+	return true;
 }
