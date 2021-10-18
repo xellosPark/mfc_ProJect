@@ -89,6 +89,7 @@ public:
 	CUnitSerial* m_pSerial = nullptr;
 	
 	afx_msg void OnBnClickedButton23();
+	afx_msg void OnBnClickedButton25();
 };
 
 

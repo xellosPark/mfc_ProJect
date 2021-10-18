@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <sstream> 
 #include <string.h>
+#include "DlgFileToBinary.h"
 
 
 
@@ -116,6 +117,7 @@ BEGIN_MESSAGE_MAP(CTestDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON21, &CTestDlg::OnBnClickedButton21)
 	ON_BN_CLICKED(IDC_BUTTON23, &CTestDlg::OnBnClickedButton23)
 	ON_BN_CLICKED(IDC_BUTTON24, &CTestDlg::OnBnClickedButton24)
+	ON_BN_CLICKED(IDC_BUTTON25, &CTestDlg::OnBnClickedButton25)
 END_MESSAGE_MAP()
 
 
@@ -973,4 +975,15 @@ bool CTestDlg::ReadToFile(const char* filename, char* buffer, int len)
 	fclose(fp);
 
 	return true;
+}
+
+void CTestDlg::OnBnClickedButton25()
+{
+	CDlgFileToBinary dlg;
+	INT_PTR nResponse = dlg.DoModal();
+	if (nResponse == IDOK)
+	{
+		// TODO: 여기에 [확인]을 클릭하여 대화 상자가 없어질 때 처리할
+		//  코드를 배치합니다.
+	}
 }

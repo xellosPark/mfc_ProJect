@@ -202,6 +202,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Distance.h" />
+    <ClInclude Include="DlgFileToBinary.h" />
     <ClInclude Include="lib\SerialComm.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -212,6 +213,7 @@
     <ClInclude Include="UnitSerial.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DlgFileToBinary.cpp" />
     <ClCompile Include="lib\SerialComm.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
