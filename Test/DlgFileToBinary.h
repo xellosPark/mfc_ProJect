@@ -32,4 +32,5 @@ public:
 	CEdit m_edit1;
 	virtual BOOL OnInitDialog();
 	void GetAllFindDirectory();
+	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
 };

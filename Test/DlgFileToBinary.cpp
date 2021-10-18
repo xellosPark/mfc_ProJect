@@ -34,18 +34,40 @@ void CDlgFileToBinary::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDlgFileToBinary, CDialogEx)
 	ON_BN_CLICKED(IDCANCEL, &CDlgFileToBinary::OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_BUTTON111, &CDlgFileToBinary::OnBnClickedButton111)
+	ON_WM_CONTEXTMENU()
 END_MESSAGE_MAP()
 
 
 // CDlgFileToBinary 메시지 처리기입니다.
 
+BOOL CDlgFileToBinary::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+
+	m_list1.Dir(DDL_ARCHIVE | DDL_HIDDEN | DDL_DIRECTORY, _T("c:\\*.*"));
+	//DDL_ARCHIVE -> CArchive Class는 CDocument Class와 CFile Class를 연결해 주는 역할을 한다.
+	// 숨김파일까지 찾기
+	GetAllFindDirectory();
+
+	LPCTSTR lpszmyString2 = _T("커미1.jpg"); // 찾고자하는 파일, 
+										   //Delete All Items That Begin With The Specified String.
+	int nlndex2(0);
+	while ((nlndex2 = m_list2.FindString(nlndex2, lpszmyString2)) != LB_ERR)
+	{
+		m_list2.DeleteString(nlndex2);
+	}
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
+}
 
 void CDlgFileToBinary::OnBnClickedCancel()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	CDialogEx::OnCancel();
 }
-
 
 void CDlgFileToBinary::OnBnClickedButton111()
 {
@@ -91,30 +113,6 @@ void CDlgFileToBinary::OnBnClickedButton111()
 	}
 }
 
-
-BOOL CDlgFileToBinary::OnInitDialog()
-{
-	CDialogEx::OnInitDialog();
-
-	// TODO:  여기에 추가 초기화 작업을 추가합니다.
-
-	m_list1.Dir(DDL_ARCHIVE | DDL_HIDDEN | DDL_DIRECTORY, _T("c:\\*.*"));
-	//DDL_ARCHIVE -> CArchive Class는 CDocument Class와 CFile Class를 연결해 주는 역할을 한다.
-	// 숨김파일까지 찾기
-	GetAllFindDirectory();
-
-	LPCTSTR lpszmyString2 = _T("커미1.jpg"); // 찾고자하는 파일, 
-										   //Delete All Items That Begin With The Specified String.
-	int nlndex2(0);
-	while ((nlndex2 = m_list2.FindString(nlndex2, lpszmyString2)) != LB_ERR)
-	{
-		m_list2.DeleteString(nlndex2);
-	}
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
-}
-
 void CDlgFileToBinary::GetAllFindDirectory()
 {
 	// 숨김 파일까지 검색하는 로직
@@ -138,4 +136,40 @@ void CDlgFileToBinary::GetAllFindDirectory()
 	}
 
 	FindClose(h_item_list);
+}
+
+
+void CDlgFileToBinary::OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
+	// int nlndex = m_list3.GetCurSel(); // 단일선택^
+	// List 속성에서 다중으로 변경해야 한다...
+	int nIndex = m_list3.GetCaretIndex(); // 다중선택
+
+	if ( nIndex < 0 )
+	{
+		return;
+	}
+
+	if (nIndex >= 0 )
+	{
+		MessageBox(_T("삭제 할까요?"));
+	}
+
+	m_list3.DeleteString(nIndex); // 선택 삭제
+
+	//  [10/18/2021 ubisam007] 다중으로 삭제
+	int nCount = m_list3.GetSelCount(); // 단일선택
+	if (nCount < 0) return;
+
+	CArray<int, int> aryListBoxSel;
+	aryListBoxSel.SetSize(nCount);
+
+	m_list3.GetSelItems(nCount, aryListBoxSel.GetData());
+	// 뒤에서 부터 하나씩지워야 데이터가 들어지지 않음
+
+	for (int i = nCount - 1; i >= 0; i--)
+	{
+		m_list3.DeleteString(aryListBoxSel[i]);
+	}
 }
