@@ -201,8 +201,12 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BinaryToASCII.h" />
     <ClInclude Include="Distance.h" />
     <ClInclude Include="DlgFileToBinary.h" />
+    <ClInclude Include="DlgMuuseHookNotepen.h" />
+    <ClInclude Include="H2.h" />
+    <ClInclude Include="H5.h" />
     <ClInclude Include="lib\SerialComm.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -213,7 +217,9 @@
     <ClInclude Include="UnitSerial.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BinaryToASCII.cpp" />
     <ClCompile Include="DlgFileToBinary.cpp" />
+    <ClCompile Include="DlgMuuseHookNotepen.cpp" />
     <ClCompile Include="lib\SerialComm.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

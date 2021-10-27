@@ -97,7 +97,7 @@ void CDlgFileToBinary::OnBnClickedButton111()
 					strTotal.Format(_T("%08d : "), nline++);
 					for (int i = 0; i < 30; i++)
 					{
-						str.Format(_T("%02X "), temp[i]);
+						str.Format(_T("%02x "), temp[i]);
 						strTotal += str;
 					}
 

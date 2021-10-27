@@ -16,6 +16,8 @@
 #include <sstream> 
 #include <string.h>
 #include "DlgFileToBinary.h"
+#include "BinaryToASCII.h"
+#include "DlgMuuseHookNotepen.h"
 
 
 
@@ -118,6 +120,8 @@ BEGIN_MESSAGE_MAP(CTestDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON23, &CTestDlg::OnBnClickedButton23)
 	ON_BN_CLICKED(IDC_BUTTON24, &CTestDlg::OnBnClickedButton24)
 	ON_BN_CLICKED(IDC_BUTTON25, &CTestDlg::OnBnClickedButton25)
+	ON_BN_CLICKED(IDC_BUTTON26, &CTestDlg::OnBnClickedButton26)
+	ON_BN_CLICKED(IDC_BUTTON27, &CTestDlg::OnBnClickedButton27)
 END_MESSAGE_MAP()
 
 
@@ -983,7 +987,28 @@ void CTestDlg::OnBnClickedButton25()
 	INT_PTR nResponse = dlg.DoModal();
 	if (nResponse == IDOK)
 	{
-		// TODO: 여기에 [확인]을 클릭하여 대화 상자가 없어질 때 처리할
-		//  코드를 배치합니다.
+		
+	}
+}
+
+
+void CTestDlg::OnBnClickedButton26()
+{
+	CBinaryToASCII dlg;
+	INT_PTR nResponse = dlg.DoModal();
+	if (nResponse == IDOK)
+	{
+
+	}
+}
+
+
+void CTestDlg::OnBnClickedButton27()
+{
+	CDlgMuuseHookNotepen dlg;
+	INT_PTR nResponse = dlg.DoModal();
+	if (nResponse == IDOK)
+	{
+
 	}
 }
