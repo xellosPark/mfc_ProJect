@@ -16,8 +16,6 @@
 #include <sstream> 
 #include <string.h>
 #include "DlgFileToBinary.h"
-#include "BinaryToASCII.h"
-#include "DlgMuuseHookNotepen.h"
 
 
 
@@ -837,16 +835,16 @@ void CTestDlg::OnBnClickedButton23()
 }
 
 
-struct SumFunctor : public std::unary_function<int, void> {
-	SumFunctor(int& number) : sum(number) {}
-
-	void operator() (int& number) {
-		sum += number;
-	}
-
-private:
-	int& sum;
-};
+// struct SumFunctor : public std::unary_function<int, void> {
+// 	SumFunctor(int& number) : sum(number) {}
+// 
+// 	void operator() (int& number) {
+// 		sum += number;
+// 	}
+// 
+// private:
+// 	int& sum;
+// };
 
 
 void CTestDlg::OnBnClickedButton24()
@@ -857,7 +855,7 @@ void CTestDlg::OnBnClickedButton24()
 
 	//for each (auto var in numbers SumFunctor(sum));
 
-	for_each(numbers.begin(), numbers.end(), SumFunctor(sum));
+	//for_each(numbers.begin(), numbers.end(), SumFunctor(sum));
 
 	sum = 0;
 
@@ -994,21 +992,11 @@ void CTestDlg::OnBnClickedButton25()
 
 void CTestDlg::OnBnClickedButton26()
 {
-	CBinaryToASCII dlg;
-	INT_PTR nResponse = dlg.DoModal();
-	if (nResponse == IDOK)
-	{
-
-	}
+	
 }
 
 
 void CTestDlg::OnBnClickedButton27()
 {
-	CDlgMuuseHookNotepen dlg;
-	INT_PTR nResponse = dlg.DoModal();
-	if (nResponse == IDOK)
-	{
-
-	}
+	
 }
